@@ -1,5 +1,7 @@
 use crate::utils::{fetch_mouse_coordinates, tile_from_world_coordinates};
 use crate::MainCamera;
+use crate::map::{TileSize};
+
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 
@@ -74,7 +76,7 @@ impl Default for Gold {
 }
 
 /// Controls whether a tile can be built on or not
-pub struct Buildable(bool);
+pub struct Buildable(pub bool);
 
 impl Default for Buildable {
 	fn default() -> Self{
@@ -87,6 +89,7 @@ fn build_tower(
     mut commands: Commands,
     map: MapQuery,
     
+    tile_size: Res<TileSize>,
     keyboard_input: Res<Input<KeyCode>>,
     windows: Res<Windows>,
     selected_tower_type: Res<TowerType>,
@@ -116,11 +119,16 @@ fn build_tower(
 			return;
 		}
 
-		let tile_coordinates = tile_from_world_coordinates(mouse_position.unwrap());
+		let tile_coordinates = tile_from_world_coordinates(mouse_position.unwrap(), tile_size.0);
+        // Check that the coordinate conversion returned a valid positive tile coordinate value
+        if tile_coordinates.is_none(){
+            info!("Coordinates too negative: no tile under cursor.");
+            return;
+        }
 
 		// FIXME: lookup current map from resource
 		// FIXME: use enum value for appropriate layer
-        let tile_entity = map.get_tile_entity(tile_coordinates, 0 as u16, 0 as u16);
+        let tile_entity = map.get_tile_entity(tile_coordinates.unwrap(), 0u16, 0u16);
 
         // Check that a tile exists under the cursor
         if tile_entity.is_err() {
