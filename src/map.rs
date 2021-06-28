@@ -85,7 +85,7 @@ fn color_buildable_tiles(
 ) {
     for (buildable, mut tile, position) in query.iter_mut(){
         if !buildable.0 {
-            tile.texture_index = 4;
+            tile.texture_index = 1;
         }
         // This is needed so the chunk will update the mesh, changing the displayed graphics
         map_query.notify_chunk_for_tile(*position, 0u16, 0u16);
